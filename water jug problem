@@ -1,0 +1,104 @@
+class WaterJugProblem:
+    def __init__(self, jug1_capacity, jug2_capacity, target_volume):
+        self.jug1_capacity = jug1_capacity
+        self.jug2_capacity = jug2_capacity
+        self.target_volume = target_volume
+        self.visited_states = set()
+
+    def pour(self, state, from_jug, to_jug):
+        if from_jug == 1:
+            return (0, state[1])
+        elif from_jug == 2:
+            return (state[0], 0)
+
+    def fill(self, state, jug):
+        if jug == 1:
+            return (self.jug1_capacity, state[1])
+        elif jug == 2:
+            return (state[0], self.jug2_capacity)
+
+    def empty(self, state, jug):
+        if jug == 1:
+            return (0, state[1])
+        elif jug == 2:
+            return (state[0], 0)
+
+    def is_goal_state(self, state):
+        return self.target_volume in state
+
+    def explore_states(self, current_state):
+        next_states = []
+
+        # Fill jug 1
+        next_state = self.fill(current_state, 1)
+        if next_state not in self.visited_states:
+            next_states.append(('FILL', 1, next_state))
+            self.visited_states.add(next_state)
+
+        # Fill jug 2
+        next_state = self.fill(current_state, 2)
+        if next_state not in self.visited_states:
+            next_states.append(('FILL', 2, next_state))
+            self.visited_states.add(next_state)
+
+        # Empty jug 1
+        next_state = self.empty(current_state, 1)
+        if next_state not in self.visited_states:
+            next_states.append(('EMPTY', 1, next_state))
+            self.visited_states.add(next_state)
+
+        # Empty jug 2
+        next_state = self.empty(current_state, 2)
+        if next_state not in self.visited_states:
+            next_states.append(('EMPTY', 2, next_state))
+            self.visited_states.add(next_state)
+
+        # Pour from jug 1 to jug 2
+        next_state = self.pour(current_state, 1, 2)
+        if next_state not in self.visited_states:
+            next_states.append(('POUR', 1, 2, next_state))
+            self.visited_states.add(next_state)
+
+        # Pour from jug 2 to jug 1
+        next_state = self.pour(current_state, 2, 1)
+        if next_state not in self.visited_states:
+            next_states.append(('POUR', 2, 1, next_state))
+            self.visited_states.add(next_state)
+
+        return next_states
+
+    def solve(self):
+        initial_state = (0, 0)
+        queue = [(None, None, initial_state)]
+
+        while queue:
+            action, jug, state = queue.pop(0)
+            if self.is_goal_state(state):
+                return [(action, jug)]  # Return the sequence of actions
+            next_states = self.explore_states(state)
+            queue.extend([(a, j, s) for a, j, s in next_states])
+
+        return None  # No solution found
+
+
+# Example usage
+if __name__ == "__main__":
+    jug1_capacity = 4
+    jug2_capacity = 3
+    target_volume = 2
+
+    problem = WaterJugProblem(jug1_capacity, jug2_capacity, target_volume)
+    solution = problem.solve()
+
+    if solution:
+        print("Solution Found:")
+        for step in solution:
+            action, jug = step[0], step[1]
+            if action == 'FILL':
+                print(f"Fill jug {jug}")
+            elif action == 'EMPTY':
+                print(f"Empty jug {jug}")
+            elif action == 'POUR':
+                print(f"Pour from jug {jug} to jug {step[2]}")
+    else:
+        print("No solution found for the given problem.")
