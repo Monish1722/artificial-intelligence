@@ -1,0 +1,48 @@
+class VacuumCleaner:
+    def __init__(self, initial_state):
+        self.state = initial_state
+
+    def clean(self):
+        print("Initial State:")
+        self.print_state()
+
+        while True:
+            if self.state[0] == 1:  # Check if the current location is dirty
+                self.clean_current_location()
+            else:
+                print("No dirt at current location.")
+
+            if self.state[1] == 'A':
+                self.move_right()
+            else:
+                self.move_left()
+
+            if self.state[0] == 'END':
+                print("All locations are clean. Exiting.")
+                break
+
+    def clean_current_location(self):
+        print("Cleaning the current location...")
+        self.state[0] = 0  # Mark the current location as clean
+
+    def move_right(self):
+        print("Moving to the right...")
+        self.state[1] = 'B'  # Move to the next location
+        self.print_state()
+
+    def move_left(self):
+        print("Moving to the left...")
+        self.state[1] = 'A'  # Move to the previous location
+        self.print_state()
+
+    def print_state(self):
+        print("State:", self.state)
+
+
+if __name__ == "__main__":
+    # Initial state: [location_state, current_location]
+    # '0' represents clean, '1' represents dirty
+    # 'A' represents left, 'B' represents right
+    initial_state = [1, 'A']  # Starting at a dirty location on the left
+    vacuum_cleaner = VacuumCleaner(initial_state)
+    vacuum_cleaner.clean()
