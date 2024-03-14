@@ -1,0 +1,51 @@
+from collections import deque
+
+# State class to represent the state of the problem
+class State:
+    def __init__(self, missionaries, cannibals, boat):
+        self.missionaries = missionaries
+        self.cannibals = cannibals
+        self.boat = boat
+
+    def __repr__(self):
+        return f"({self.missionaries}, {self.cannibals}, {self.boat})"
+
+    def is_valid(self):
+        if self.missionaries < 0 or self.missionaries > 3:
+            return False
+        if self.cannibals < 0 or self.cannibals > 3:
+            return False
+        if self.missionaries < self.cannibals and self.missionaries > 0:
+            return False
+        if 3 - self.missionaries < 3 - self.cannibals and 3 - self.missionaries > 0:
+            return False
+        return True
+
+    def is_goal(self):
+        return self.missionaries == 0 and self.cannibals == 0 and self.boat == 0
+
+    def successors(self):
+        successors = []
+        if self.boat == 1:
+            # Boat on the original side
+            for m in range(3):
+                for c in range(3):
+                    if 1 <= m + c <= 2:
+                        new_state = State(self.missionaries - m, self.cannibals - c, 0)
+                        if new_state.is_valid():
+                            successors.append(new_state)
+        else:
+            # Boat on the other side
+            for m in range(3):
+                for c in range(3):
+                    if 1 <= m + c <= 2:
+                        new_state = State(self.missionaries + m, self.cannibals + c, 1)
+                        if new_state.is_valid():
+                            successors.append(new_state)
+        return successors
+
+# Breadth-first search to find the solution
+def breadth_first_search():
+    start_state = State(3, 3, 1)
+    frontier = deque([start_state])
+    ex
