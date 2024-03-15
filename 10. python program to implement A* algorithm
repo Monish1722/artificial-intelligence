@@ -1,0 +1,78 @@
+import heapq
+
+class Node:
+    def __init__(self, x, y, walkable=True):
+        self.x = x
+        self.y = y
+        self.walkable = walkable
+        self.g = 0  # Cost from start node to current node
+        self.h = 0  # Heuristic cost from current node to end node
+        self.parent = None
+
+    def f(self):
+        return self.g + self.h
+
+class AStar:
+    def __init__(self, grid):
+        self.grid = grid
+        self.open_set = []
+        self.closed_set = []
+
+    def heuristic(self, node, end):
+        return abs(node.x - end.x) + abs(node.y - end.y)
+
+    def get_neighbors(self, node):
+        neighbors = []
+        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            nx, ny = node.x + dx, node.y + dy
+            if 0 <= nx < len(self.grid) and 0 <= ny < len(self.grid[0]) and self.grid[nx][ny].walkable:
+                neighbors.append(self.grid[nx][ny])
+        return neighbors
+
+    def reconstruct_path(self, current):
+        path = []
+        while current.parent:
+            path.append((current.x, current.y))
+            current = current.parent
+        path.append((current.x, current.y))
+        return path[::-1]
+
+    def search(self, start, end):
+        heapq.heappush(self.open_set, (0, start))
+        
+        while self.open_set:
+            _, current = heapq.heappop(self.open_set)
+            
+            if current == end:
+                return self.reconstruct_path(current)
+            
+            self.closed_set.append(current)
+            
+            for neighbor in self.get_neighbors(current):
+                if neighbor in self.closed_set:
+                    continue
+                
+                tentative_g = current.g + 1  # Assuming all edges have a cost of 1
+                
+                if neighbor not in self.open_set or tentative_g < neighbor.g:
+                    neighbor.parent = current
+                    neighbor.g = tentative_g
+                    neighbor.h = self.heuristic(neighbor, end)
+                    
+                    if neighbor not in self.open_set:
+                        heapq.heappush(self.open_set, (neighbor.f(), neighbor))
+        
+        return None  # No path found
+
+# Example usage:
+grid = [[Node(x, y, True) for y in range(5)] for x in range(5)]
+start = grid[0][0]
+end = grid[4][4]
+
+astar = AStar(grid)
+path = astar.search(start, end)
+
+if path:
+    print("Path found:", path)
+else:
+    print("No path found")
