@@ -1,0 +1,72 @@
+import math
+
+# Constants representing the players
+MAX_PLAYER = 'X'
+MIN_PLAYER = 'O'
+EMPTY = ' '
+
+def evaluate(state):
+    """
+    Evaluate the current game state.
+    Returns +1 if the MAX_PLAYER wins, -1 if the MIN_PLAYER wins, 0 for a draw, None otherwise.
+    """
+    # Check rows
+    for row in state:
+        if row.count(MAX_PLAYER) == 3:
+            return +1
+        elif row.count(MIN_PLAYER) == 3:
+            return -1
+    
+    # Check columns
+    for col in range(3):
+        if state[0][col] == state[1][col] == state[2][col] == MAX_PLAYER:
+            return +1
+        elif state[0][col] == state[1][col] == state[2][col] == MIN_PLAYER:
+            return -1
+    
+    # Check diagonals
+    if state[0][0] == state[1][1] == state[2][2] == MAX_PLAYER or \
+       state[0][2] == state[1][1] == state[2][0] == MAX_PLAYER:
+        return +1
+    elif state[0][0] == state[1][1] == state[2][2] == MIN_PLAYER or \
+         state[0][2] == state[1][1] == state[2][0] == MIN_PLAYER:
+        return -1
+    
+    # Check if it's a draw
+    if all(cell != EMPTY for row in state for cell in row):
+        return 0
+    
+    # Game is not over yet
+    return None
+
+def is_terminal(state):
+    """
+    Check if the game state is terminal (win, loss, draw).
+    """
+    return evaluate(state) is not None
+
+def minimax(state, depth, alpha, beta, maximizing_player):
+    """
+    Implementation of Minimax algorithm with Alpha-Beta pruning.
+    """
+    if is_terminal(state) or depth == 0:
+        return evaluate(state), None
+
+    if maximizing_player:
+        value = -math.inf
+        best_move = None
+        for i in range(3):
+            for j in range(3):
+                if state[i][j] == EMPTY:
+                    state[i][j] = MAX_PLAYER
+                    score, _ = minimax(state, depth - 1, alpha, beta, False)
+                    state[i][j] = EMPTY
+                    if score > value:
+                        value = score
+                        best_move = (i, j)
+                    alpha = max(alpha, value)
+                    if alpha >= beta:
+                        break
+        return value, best_move
+    else:
+        value = math.inf
